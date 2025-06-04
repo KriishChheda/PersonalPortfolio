@@ -14,7 +14,7 @@ const Portfolio = () => {
   const shapesRef = useRef([]);
   const frameId = useRef(null);
   const isAnimating = useRef(false);
-
+  const [menuOpen, setMenuOpen] = useState(false);
   const sections = ['Home','Projects', 'Skills', 'Experience', 'Research','Achievements','contact'];
 
   const projects = [
@@ -97,17 +97,14 @@ const Portfolio = () => {
 
     const initScene = () => {
       try {
-        // Scene setup
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x0a0a0a);
         sceneRef.current = scene;
 
-        // Camera setup
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 0, 5);
         cameraRef.current = camera;
 
-        // Renderer setup with better error handling
         renderer = new THREE.WebGLRenderer({ 
           antialias: true, 
           alpha: true,
@@ -118,13 +115,11 @@ const Portfolio = () => {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.setClearColor(0x0a0a0a, 1);
         
-        // Check if mount still exists before appending
         if (mountRef.current && !mountRef.current.contains(renderer.domElement)) {
           mountRef.current.appendChild(renderer.domElement);
         }
         rendererRef.current = renderer;
 
-        // Enhanced particle system
         const particleCount = 1200;
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(particleCount * 3);
@@ -134,17 +129,14 @@ const Portfolio = () => {
         for (let i = 0; i < particleCount; i++) {
           const i3 = i * 3;
           
-          // Position
           positions[i3] = (Math.random() - 0.5) * 25;
           positions[i3 + 1] = (Math.random() - 0.5) * 25;
           positions[i3 + 2] = (Math.random() - 0.5) * 25;
 
-          // Colors - more vibrant
-          colors[i3] = Math.random() * 0.4 + 0.6;     // Red
-          colors[i3 + 1] = Math.random() * 0.6 + 0.4; // Green  
-          colors[i3 + 2] = 1;                         // Blue
+          colors[i3] = Math.random() * 0.4 + 0.6;    
+          colors[i3 + 1] = Math.random() * 0.6 + 0.4; 
+          colors[i3 + 2] = 1;                         
 
-          // Velocities for more dynamic movement
           velocities[i3] = (Math.random() - 0.5) * 0.01;
           velocities[i3 + 1] = (Math.random() - 0.5) * 0.01;
           velocities[i3 + 2] = (Math.random() - 0.5) * 0.01;
@@ -167,7 +159,6 @@ const Portfolio = () => {
         scene.add(particleSystem);
         particlesRef.current = particleSystem;
 
-        // Create floating geometric shapes
         const geometries = [
           new THREE.TetrahedronGeometry(0.6, 0),
           new THREE.OctahedronGeometry(0.6, 0),
@@ -190,7 +181,6 @@ const Portfolio = () => {
             (Math.random() - 0.5) * 8
           );
           
-          // Add rotation speeds
           shape.userData = {
             rotationSpeed: {
               x: (Math.random() - 0.5) * 0.02,
@@ -213,14 +203,12 @@ const Portfolio = () => {
       }
     };
 
-    // Animation loop with error handling
     const animate = (timestamp) => {
       if (!isAnimating.current) return;
       
       try {
         frameId.current = requestAnimationFrame(animate);
 
-        // Animate particles with bounds checking
         if (particlesRef.current && particlesRef.current.geometry) {
           const positions = particlesRef.current.geometry.attributes.position.array;
           const velocities = particlesRef.current.geometry.attributes.velocity?.array;
@@ -231,7 +219,6 @@ const Portfolio = () => {
               positions[i + 1] += velocities[i + 1];
               positions[i + 2] += velocities[i + 2];
               
-              // Boundary wrapping
               if (Math.abs(positions[i]) > 15) velocities[i] *= -1;
               if (Math.abs(positions[i + 1]) > 15) velocities[i + 1] *= -1;
               if (Math.abs(positions[i + 2]) > 15) velocities[i + 2] *= -1;
@@ -240,12 +227,10 @@ const Portfolio = () => {
             particlesRef.current.geometry.attributes.position.needsUpdate = true;
           }
           
-          // Gentle rotation
           particlesRef.current.rotation.y += 0.001;
           particlesRef.current.rotation.x += 0.0005;
         }
 
-        // Animate shapes
         shapesRef.current.forEach((shape, index) => {
           if (shape && shape.userData) {
             const { rotationSpeed, floatSpeed, floatOffset } = shape.userData;
@@ -259,7 +244,6 @@ const Portfolio = () => {
           }
         });
 
-        // Render
         if (rendererRef.current && sceneRef.current && cameraRef.current) {
           rendererRef.current.render(sceneRef.current, cameraRef.current);
         }
@@ -268,7 +252,6 @@ const Portfolio = () => {
       }
     };
 
-    // Handle resize
     const handleResize = () => {
       if (cameraRef.current && rendererRef.current) {
         cameraRef.current.aspect = window.innerWidth / window.innerHeight;
@@ -277,7 +260,6 @@ const Portfolio = () => {
       }
     };
 
-    // Initialize scene with delay to ensure DOM is ready
     const initTimer = setTimeout(() => {
       if (initScene()) {
         isAnimating.current = true;
@@ -287,7 +269,6 @@ const Portfolio = () => {
       }
     }, 100);
 
-    // Cleanup function
     return () => {
       clearTimeout(initTimer);
       isAnimating.current = false;
@@ -298,7 +279,6 @@ const Portfolio = () => {
       
       window.removeEventListener('resize', handleResize);
       
-      // Clean up Three.js objects
       if (scene) {
         scene.traverse((child) => {
           if (child.geometry) child.geometry.dispose();
@@ -320,7 +300,6 @@ const Portfolio = () => {
         }
       }
       
-      // Clear refs
       sceneRef.current = null;
       rendererRef.current = null;
       cameraRef.current = null;
@@ -335,10 +314,8 @@ const Portfolio = () => {
 
   return (
     <div className="relative min-h-screen bg-gray-900 text-white overflow-hidden">
-      {/* 3D Background */}
       <div ref={mountRef} className="fixed inset-0 z-10" />
       
-      {/* Loading Screen */}
       {!isLoaded && (
         <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
           <div className="text-center">
@@ -348,38 +325,67 @@ const Portfolio = () => {
         </div>
       )}
 
-      {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-40 p-6 backdrop-blur-md bg-black/30">
-        <div className="flex justify-between items-center max-w-7xl mx-auto">
-          <div className="great-vibes-regular text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-400 bg-clip-text text-transparent">
-            <i> Kriish Chheda </i>
-          </div>
-          <div className="hidden md:flex space-x-8">
-            {sections.map((section, index) => (
-              <button
-                key={index}
-                onClick={() => scrollToSection(index)}
-                className={`px-4 py-2 rounded-full transition-all duration-300 backdrop-blur-sm ${
-                  currentSection === index
-                    ? 'bg-blue-500/80 text-white shadow-lg shadow-blue-500/30'
-                    : 'text-gray-300 hover:text-white hover:bg-white/20'
-                }`}
-              >
-                {section}
-              </button>
-            ))}
-          </div>
-          
-          {/* Mobile Menu */}
-          <div className="md:hidden">
-            <button className="text-white p-2">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
+      <div className="flex justify-between items-center max-w-7xl mx-auto">
+        <div className="great-vibes-regular text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-400 bg-clip-text text-transparent">
+          <i>Kriish Chheda</i>
         </div>
-      </nav>
+
+        {/* Desktop Menu */}
+        <div className="hidden md:flex space-x-8">
+          {sections.map((section, index) => (
+            <button
+              key={index}
+              onClick={() => scrollToSection(index)}
+              className={`px-4 py-2 rounded-full transition-all duration-300 backdrop-blur-sm ${
+                currentSection === index
+                  ? "bg-blue-500/80 text-white shadow-lg shadow-blue-500/30"
+                  : "text-gray-300 hover:text-white hover:bg-white/20"
+              }`}
+            >
+              {section}
+            </button>
+          ))}
+        </div>
+
+        <div className="md:hidden">
+          <button
+            className="text-white p-2"
+            onClick={() => setMenuOpen((prev) => !prev)}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {menuOpen && (
+        <div className="md:hidden mt-4 px-6 space-y-2">
+          {sections.map((section, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                scrollToSection(index);
+                setMenuOpen(false);
+              }}
+              className={`block w-full text-left px-4 py-2 rounded-lg transition-all duration-300 backdrop-blur-sm ${
+                currentSection === index
+                  ? "bg-blue-500/80 text-white shadow-md shadow-blue-500/30"
+                  : "text-gray-300 hover:text-white hover:bg-white/20"
+              }`}
+            >
+              {section}
+            </button>
+          ))}
+        </div>
+      )}
+    </nav>
 
       <div className="relative z-20 pt-20">
         {currentSection === 0 && (
@@ -436,7 +442,6 @@ const Portfolio = () => {
         </section>
         )}
 
-        {/* Projects Section */}
         {currentSection === 1 && (
           <section className="min-h-screen py-20 px-6">
             <div className="max-w-6xl mx-auto">
@@ -503,7 +508,7 @@ const Portfolio = () => {
         {currentSection === 3 && (
           <section className="min-h-screen py-20 px-6">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-5xl font-bold mb-16 text-center bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent drop-shadow-lg">
+              <h2 className="text-5xl font-bold mb-16 text-center bg-gradient-to-r from-blue-400 to-blue-400 bg-clip-text text-transparent drop-shadow-lg">
                 Experience & Leadership
               </h2>
               <div className="space-y-8">
@@ -540,7 +545,7 @@ const Portfolio = () => {
         {currentSection === 4 && (
         <section className="min-h-screen flex items-center justify-center px-6 py-12">
             <div className="max-w-6xl w-full backdrop-blur-lg bg-black/10 p-8 rounded-3xl border border-white/20 shadow-2xl shadow-black/50">
-            <h2 className="text-5xl font-bold mb-12 text-center bg-gradient-to-r from-purple-400 to-blue-600 bg-clip-text text-transparent drop-shadow-lg">
+            <h2 className="text-5xl font-bold mb-12 text-center bg-gradient-to-r from-blue-400 to-blue-400 bg-clip-text text-transparent drop-shadow-lg">
                 Research & Blogs
             </h2>
 
