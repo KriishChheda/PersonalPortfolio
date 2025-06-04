@@ -376,8 +376,8 @@ const Portfolio = () => {
               }}
               className={`block w-full text-left px-4 py-2 rounded-lg transition-all duration-300 backdrop-blur-sm ${
                 currentSection === index
-                  ? "bg-blue-500/80 text-white shadow-md shadow-blue-500/30"
-                  : "text-gray-300 hover:text-white hover:bg-white/20"
+                  ? "bg-blue-500/80 text-white"
+                  : "text-white bg-blue-500 hover:bg-blue-300 duration-100"
               }`}
             >
               {section}
